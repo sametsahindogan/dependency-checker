@@ -6,10 +6,10 @@ use App\Services\DependencyService\DependencyResponse;
 use App\Services\GitService\GitResponse;
 
 /**
- * Interface Dependency
+ * Interface DependencyContract
  * @package App\Services\GitService\Dependencies
  */
-interface Dependency
+interface DependencyContract
 {
     /**
      * @return array

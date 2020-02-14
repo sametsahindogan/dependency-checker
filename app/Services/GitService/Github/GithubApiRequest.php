@@ -3,15 +3,15 @@
 namespace App\Services\GitService\Github;
 
 use App\Models\Dependency;
-use App\Services\ApiService\ApiCallBuilder;
 use App\Services\GitService\Dependencies\FetchNpm;
 use App\Services\GitService\Dependencies\FetchPackagist;
 use App\Services\GitService\GitRequest;
 use App\Services\GitService\GitResponse;
+use Sametsahindogan\GuzzleWrapper\Builder\ApiCallBuilder;
 
 /**
  * Class GithubApiRequest
- * @package App\Services\ApiService\GithubService
+ * @package App\Services\GitService\Github
  */
 class GithubApiRequest implements GitRequest
 {
@@ -49,7 +49,7 @@ class GithubApiRequest implements GitRequest
     public function getRepo(string $repo): GitResponse
     {
         return (new GithubApiResponse(
-            (new ApiCallBuilder('/repos/' . trim($repo), $this->apiUrl))
+            (new ApiCallBuilder($this->apiUrl,'/repos/' . trim($repo), ApiCallBuilder::HTTP_GET))
                 ->call()
         ));
     }
@@ -62,7 +62,7 @@ class GithubApiRequest implements GitRequest
     public function checkFile(string $repoId, string $file): GitResponse
     {
         return (new GithubApiResponse(
-            (new ApiCallBuilder('/repositories/' . trim($repoId) . '/contents/' . $file, $this->apiUrl))
+            (new ApiCallBuilder($this->apiUrl,'/repositories/' . trim($repoId) . '/contents/' . $file, ApiCallBuilder::HTTP_GET))
                 ->call()
         ));
     }

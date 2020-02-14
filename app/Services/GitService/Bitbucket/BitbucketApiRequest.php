@@ -3,11 +3,11 @@
 namespace App\Services\GitService\Bitbucket;
 
 use App\Models\Dependency;
-use App\Services\ApiService\ApiCallBuilder;
 use App\Services\GitService\Dependencies\FetchNpm;
 use App\Services\GitService\Dependencies\FetchPackagist;
 use App\Services\GitService\GitRequest;
 use App\Services\GitService\GitResponse;
+use Sametsahindogan\GuzzleWrapper\Builder\ApiCallBuilder;
 
 /**
  * Class BitbucketApiRequest
@@ -49,7 +49,7 @@ class BitbucketApiRequest implements GitRequest
     public function getRepo(string $repo): GitResponse
     {
         return (new BitbucketApiResponse(
-            (new ApiCallBuilder('/2.0/repositories/' . trim($repo), $this->apiUrl))
+            (new ApiCallBuilder($this->apiUrl,'/2.0/repositories/' . trim($repo), ApiCallBuilder::HTTP_GET))
                 ->call()
         ));
     }
@@ -62,7 +62,7 @@ class BitbucketApiRequest implements GitRequest
     public function checkFile(string $repoSlug, string $file): GitResponse
     {
         return (new BitbucketApiResponse(
-            (new ApiCallBuilder('/2.0/repositories/' . $repoSlug . '/src/master/' . $file, $this->apiUrl))
+            (new ApiCallBuilder($this->apiUrl,'/2.0/repositories/' . $repoSlug . '/src/master/' . $file, ApiCallBuilder::HTTP_GET))
                 ->call()
         ));
     }

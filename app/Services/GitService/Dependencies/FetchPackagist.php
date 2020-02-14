@@ -9,7 +9,7 @@ use App\Services\GitService\GitResponse;
  * Class FetchPackagist
  * @package App\Services\GitService\Dependencies
  */
-class FetchPackagist implements Dependency
+class FetchPackagist implements DependencyContract
 {
     /** @var array $packages */
     protected $packages = [];

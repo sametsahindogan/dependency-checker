@@ -5,7 +5,7 @@ namespace App\Services\CompareService;
 use App\Jobs\NotificationMailJob;
 use App\Models\Dependency;
 use App\Models\Repository;
-use App\Services\ApiService\DependencyFactory;
+use App\Services\DependencyService\DependencyFactory;
 use App\Services\DependencyService\DependencyResponse;
 use Composer\Semver\Comparator;
 use Illuminate\Database\Eloquent\Collection;

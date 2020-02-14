@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Services\ApiService;
+namespace App\Services\DependencyService;
 
 use App\Services\DependencyService\Npm\NpmApiRequest;
 use App\Services\DependencyService\Packagist\PackagistApiRequest;
@@ -8,7 +8,7 @@ use InvalidArgumentException;
 
 /**
  * Class DependencyFactory
- * @package App\Services\ApiService
+ * @package App\Services\DependencyService
  */
 class DependencyFactory
 {

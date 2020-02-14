@@ -11,17 +11,6 @@
 |
 */
 
-use App\Jobs\NotificationMailJob;
-use App\Models\Dependency;
-use App\Models\Repository;
-use App\Services\ApiService\GithubService\GithubApiResponse;
-use App\Services\ApiService\NpmService\NpmApiRequest;
-use App\Services\ApiService\PackagistService\PackagistApiRequest;
-use Composer\Semver\Comparator;
-use \App\Services\ApiService\GithubService\GithubApiRequest;
-use Illuminate\Support\Facades\Log;
-
-
 Route::get('/logout', 'LoginController@logout')->name('logout');
 
 Route::group(['middleware' => 'guest'], function () {
@@ -76,16 +65,4 @@ Route::group(['middleware' => 'authed'], function () {
             });
         });
     });
-});
-
-Route::get('/test', function () {
-
-    $bitbucket = (new \App\Services\GitService\Bitbucket\BitbucketApiRequest());
-
-    $bitbucket->getRepoWithDependencies('sametsahindogan/atolye15');
-
-//    $bitbucket = (new \App\Services\GitService\Git\GitApiRequest());
-
-//    $bitbucket->getRepoWithDependencies('sametsahindogan/laravel-jwtredis');
-
 });

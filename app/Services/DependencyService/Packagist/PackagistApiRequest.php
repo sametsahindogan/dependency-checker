@@ -2,8 +2,8 @@
 
 namespace App\Services\DependencyService\Packagist;
 
-use App\Services\ApiService\ApiCallBuilder;
 use App\Services\DependencyService\DependencyRequest;
+use Sametsahindogan\GuzzleWrapper\Builder\ApiCallBuilder;
 
 /**
  * Class PackagistApiRequest
@@ -29,7 +29,7 @@ class PackagistApiRequest implements DependencyRequest
     public function getPackage(string $repo)
     {
         return (new PackagistApiResponse(
-            (new ApiCallBuilder('/'.$repo, $this->apiUrl))
+            (new ApiCallBuilder($this->apiUrl,'/'.$repo, ApiCallBuilder::HTTP_GET))
                 ->call()
         ));
     }

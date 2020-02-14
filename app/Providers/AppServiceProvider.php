@@ -4,9 +4,9 @@ namespace App\Providers;
 
 use App\Models\Repository;
 use App\Observers\BaseObserver;
-use App\Services\ApiService\DependencyFactory;
 use App\Services\CompareService\Compare;
 use App\Services\CompareService\CompareInterface;
+use App\Services\DependencyService\DependencyFactory;
 use App\Services\GitService\GitFactory;
 use App\Services\JsonResponseService\ResponseBuilderInterface;
 use App\Services\LogService\Interfaces\LogServiceInterface;

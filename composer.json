@@ -16,7 +16,8 @@
         "guzzlehttp/guzzle": "^6.3",
         "ext-json": "*",
         "ext-dom": "*",
-        "phpmailer/phpmailer": "^6.1"
+        "phpmailer/phpmailer": "^6.1",
+        "sametsahindogan/guzzle-wrapper": "^1.0"
     },
     "require-dev": {
         "facade/ignition": "^1.4",

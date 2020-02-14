@@ -2,8 +2,8 @@
 
 namespace App\Services\DependencyService\Npm;
 
-use App\Services\ApiService\ApiCallBuilder;
 use App\Services\DependencyService\DependencyRequest;
+use Sametsahindogan\GuzzleWrapper\Builder\ApiCallBuilder;
 
 /**
  * Class NpmApiRequest
@@ -29,7 +29,7 @@ class NpmApiRequest implements DependencyRequest
     public function getPackage(string $repo)
     {
         return (new NpmApiResponse(
-            (new ApiCallBuilder('/'.trim($repo), $this->apiUrl))
+            (new ApiCallBuilder($this->apiUrl,'/'.trim($repo), ApiCallBuilder::HTTP_GET))
                 ->call()
         ));
     }
