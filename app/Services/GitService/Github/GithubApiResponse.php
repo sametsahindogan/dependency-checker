@@ -68,14 +68,6 @@ class GithubApiResponse implements GitResponse
     /**
      * @return mixed
      */
-    public function getMessage()
-    {
-        return $this->response->message;
-    }
-
-    /**
-     * @return mixed
-     */
     public function getDecoded()
     {
         return $this->response;

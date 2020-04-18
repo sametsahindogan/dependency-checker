@@ -68,14 +68,6 @@ class BitbucketApiResponse implements GitResponse
     /**
      * @return mixed
      */
-    public function getMessage()
-    {
-        // TODO: Implement getMessage() method.
-    }
-
-    /**
-     * @return mixed
-     */
     public function getDecoded()
     {
         return $this->response;

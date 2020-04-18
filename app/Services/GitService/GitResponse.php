@@ -31,11 +31,6 @@ interface GitResponse
     /**
      * @return mixed
      */
-    public function getMessage();
-
-    /**
-     * @return mixed
-     */
     public function getDecoded();
 
     /**

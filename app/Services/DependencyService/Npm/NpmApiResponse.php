@@ -40,14 +40,6 @@ class NpmApiResponse implements DependencyResponse
     }
 
     /**
-     * @return mixed
-     */
-    public function getMessage()
-    {
-        return $this->response->error;
-    }
-
-    /**
      * @return int
      */
     public function getStatusCode()

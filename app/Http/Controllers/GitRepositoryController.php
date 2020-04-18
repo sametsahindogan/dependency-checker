@@ -150,7 +150,7 @@ class GitRepositoryController extends BaseCrudController implements RenderView, 
         if ($repo instanceof GitResponse) {
             return response()->json($this->response
                 ->result(false)
-                ->message('Repository ' . $repo->getMessage())
+                ->message('Repository not found.')
                 ->build()
             );
         }
