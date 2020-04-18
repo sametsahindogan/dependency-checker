@@ -171,10 +171,10 @@ class Compare implements CompareInterface
      */
     public function execute()
     {
+        $queryBuilder = $this->model->with('dependencies', 'emails');
+
         if ($this->getCheckAll()) {
-            $repositories = $this->model
-                ->with('dependencies', 'emails')
-                ->get();
+            $repositories = $queryBuilder->get();
 
             foreach ($repositories as $repository) {
 
@@ -183,15 +183,14 @@ class Compare implements CompareInterface
                 $this->compare($repository);
             }
         } else {
-            $repository = $this->model
-                ->with('dependencies', 'emails')
-                ->find($this->getModelId());
+            $repository = $queryBuilder->find($this->getModelId());
 
             $this->setMailList($repository->emails);
 
             $this->compare($repository);
 
         }
+
         return true;
     }
 
