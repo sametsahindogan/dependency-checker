@@ -34,7 +34,7 @@ interface GitRequest
      * @param string $gitRepoId
      * @param FetchPackagist $packagist
      * @param FetchNpm $npm
-     * @return mixed
+     * @return array
      */
     public function dependency(string $gitRepoId, FetchPackagist $packagist, FetchNpm $npm);
 
