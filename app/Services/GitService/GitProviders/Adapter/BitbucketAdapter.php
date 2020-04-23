@@ -2,20 +2,36 @@
 
 namespace App\Services\GitService\Adapter;
 
-use App\Services\GitService\Bitbucket\BitbucketApiRequest;
+use App\Services\GitService\GitProviders\Bitbucket\BitbucketApiRequest;
 
+/**
+ * Class BitbucketAdapter
+ * @package App\Services\GitService\Adapter
+ */
 class BitbucketAdapter implements GitAdapterInterface
 {
+    /** @var string $repo */
     protected $repo;
 
-    public function setRepo(string $repo): self
+    /**
+     * @param string $repo
+     * @return GitAdapterInterface
+     */
+    public function setRepo(string $repo): GitAdapterInterface
     {
         $this->repo = $repo;
         return $this;
     }
 
-    public function call()
+    /**
+     * @return array
+     */
+    public function call(): array
     {
-        return (new BitbucketApiRequest())->getRepoWithDependencies($this->repo);
+        $bitbucket = new BitbucketApiRequest();
+
+        $bitbucket->isValidRepository($this->repo);
+
+        return $bitbucket->getRepoWithDependencies();
     }
 }

@@ -2,20 +2,36 @@
 
 namespace App\Services\GitService\Adapter;
 
-use App\Services\GitService\Github\GithubApiRequest;
+use App\Services\GitService\GitProviders\Github\GithubApiRequest;
 
+/**
+ * Class GithubAdapter
+ * @package App\Services\GitService\Adapter
+ */
 class GithubAdapter implements GitAdapterInterface
 {
+    /** @var string $repo */
     protected $repo;
 
-    public function setRepo(string $repo): self
+    /**
+     * @param string $repo
+     * @return GitAdapterInterface
+     */
+    public function setRepo(string $repo): GitAdapterInterface
     {
         $this->repo = $repo;
         return $this;
     }
 
-    public function call()
+    /**
+     * @return array
+     */
+    public function call(): array
     {
-        return (new GithubApiRequest())->getRepoWithDependencies($this->repo);
+        $github = new GithubApiRequest();
+
+        $github->isValidRepository($this->repo);
+
+        return $github->getRepoWithDependencies();
     }
 }
