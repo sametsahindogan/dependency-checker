@@ -2,100 +2,72 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Interfaces\EmailController\RenderJson;
-use App\Http\Controllers\Interfaces\EmailController\RenderView;
-use App\Models\Email;
-use App\Services\JsonResponseService\ResponseBuilderInterface;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Http\JsonResponse;
+use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\MessageBag;
+use App\Services\EmailService\EmailService;
 use Illuminate\Validation\Validator;
-use Illuminate\View\View;
+use App\Services\EmailService\Output\JsonOutput;
+use App\Services\JsonResponseService\ResponseBuilderInterface;
 
 /**
  * Class EmailController
  * @package App\Http\Controllers
  */
-class EmailController extends BaseCrudController implements RenderView, RenderJson
+class EmailController extends Controller
 {
+    /** @var EmailService $service */
+    private $service;
+
+    /** @var ResponseBuilderInterface $response */
+    private $response;
+
     /**
      * EmailController constructor.
-     * @param ResponseBuilderInterface $responseBuilder
-     * @param Email $model
+     * @param ResponseBuilderInterface $response
+     * @param EmailService $service
      */
-    public function __construct(ResponseBuilderInterface $responseBuilder, Email $model)
+    public function __construct(ResponseBuilderInterface $response, EmailService $service)
     {
-        $this->response = $responseBuilder;
-        $this->model = $model;
+        $this->service = $service;
+        $this->response = $response;
     }
 
     /**
-     * @return View
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index(): View
+    public function index()
     {
         return view('email.list');
     }
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return mixed
      */
-    public function get(Request $request): JsonResponse
+    public function get(Request $request)
     {
         $sort = $request->get('sort', 'id');
         $sortType = $request->get('order', 'desc');
         $offset = (int)$request->get('offset', 0);
         $limit = (int)$request->get('limit', 10);
 
-        /** @var Builder $queryBuilder */
-        $queryBuilder = new $this->model();
-
-        $total = $queryBuilder->count();
-
-        $datas = $queryBuilder->orderBy($sort, $sortType)
-            ->offset($offset)
-            ->limit($limit)
-            ->get();
-
-        $rows = [];
-        foreach ($datas as $key => $data) {
-            $rows[] = [
-                "id" => $data->id,
-                "order" => $offset + $key + 1,
-                "title" => $data->title,
-                "created_at" => $data->created_at->isoFormat('dddd, DD MMMM Y HH:mm'),
-                "options" => '<div class="tabledit-toolbar btn-toolbar d-block">
-                                <div class="btn-group btn-group-sm">
-                                    <a href="' . route('emails.updatePage', ['id' => $data->id]) . '" data-toggle="modal" data-target="#modalsm" class="tabledit-edit-button btn btn-sm btn-warning"><span class="glyphicon glyphicon-pencil"></span></a>
-                                    <a href="' . route('emails.deletePage', ['id' => $data->id]) . '" data-toggle="modal" data-target="#modalsm" class="tabledit-delete-button btn btn-sm btn-danger"><span class="glyphicon glyphicon-trash"></span></a>
-                                </div>
-                              </div>'
-            ];
-        }
-
-        $output = [
-            "total" => $total,
-            "rows" => $rows
-        ];
-
-        return response()->json($output);
+        return $this->service->getAllEmails($sort, $sortType, $offset, $limit, new JsonOutput());
     }
 
     /**
-     * @return View
+     * @return \Illuminate\Contracts\View\Factory|View
      */
-    public function createPage(): View
+    public function createPage()
     {
         return view('email.add');
     }
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function create(Request $request): JsonResponse
+    public function create(Request $request)
     {
         /** @var Validator $validator */
         $validator = validator($request->all(), [
@@ -105,33 +77,27 @@ class EmailController extends BaseCrudController implements RenderView, RenderJs
         ]);
 
         if ($validator->fails())
-            return $this->getErrorResponse($validator->errors());
+            return $this->getValidationErrorResponse($validator->errors());
 
-        $this->model::create([
-            'title' => $request->get('title')
-        ]);
+        $this->service->create($request->get('title'));
 
-        return response()->json($this->response
-            ->message("Successfully added.")
-            ->build()
-        );
+        return response()->json($this->response->message("Successfully added.")->build());
     }
 
     /**
      * @param $id
-     * @return View
-     * @throws \Exception
+     * @return \Illuminate\Contracts\View\Factory|View
      */
-    public function updatePage($id): View
+    public function updatePage($id)
     {
-        return view('email.edit')->with(['email' => $this->getRecordById($id)]);
+        return view('email.edit')->with(['email' => $this->service->getById($id)]);
     }
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request): JsonResponse
+    public function update(Request $request)
     {
         /** @var Validator $validator */
         $validator = validator($request->all(), [
@@ -141,23 +107,19 @@ class EmailController extends BaseCrudController implements RenderView, RenderJs
         ]);
 
         if ($validator->fails())
-            return $this->getErrorResponse($validator->errors());
+            return $this->getValidationErrorResponse($validator->errors());
 
-        try
-        {
-            /** @var Email $email */
-            $email = $this->getRecordById($request->get('id'));
-        }
-        catch(ModelNotFoundException $e)
-        {
+        try {
+
+            $this->service->updateById($request->get('id'), $request->get('title'));
+
+        } catch (Exception $e) {
             return response()->json($this->response
                 ->result(false)
                 ->message($e->getMessage())
                 ->build()
             );
         }
-
-        $email->update(['title' => $request->get('title')]);
 
         return response()->json($this->response
             ->message("Successfully updated.")
@@ -171,22 +133,20 @@ class EmailController extends BaseCrudController implements RenderView, RenderJs
      */
     public function deletePage($id): View
     {
-        return view('email.remove')->with(['email' => $this->getRecordById($id)]);
+        return view('email.remove')->with(['email' => $this->service->getById($id)]);
     }
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function delete(Request $request): JsonResponse
+    public function delete(Request $request)
     {
-        try
-        {
-            /** @var Email $record */
-            $email = $this->getRecordById($request->get('id'));
-        }
-        catch(ModelNotFoundException $e)
-        {
+        try {
+
+            $this->service->deleteById($request->get('id'));
+
+        } catch (Exception $e) {
             return response()->json($this->response
                 ->result(false)
                 ->message($e->getMessage())
@@ -194,12 +154,29 @@ class EmailController extends BaseCrudController implements RenderView, RenderJs
             );
         }
 
-        $email->delete();
-
         return response()->json($this->response
             ->message("Record deleted.")
             ->build()
         );
     }
+
+    protected function getValidationErrorResponse(MessageBag $errors)
+    {
+        $response = [];
+        $response['message'] = '<span class="validation-error-message">';
+        foreach ($errors->messages() as $field => $message) {
+            $response['fields'][$field] = '<span class="validation-error-field">' . $message[0] . '</span>';
+            $response['message'] .= $response['fields'][$field];
+        }
+        $response['message'] .= '</span>';
+
+        return response()->json($this->response
+            ->result(false)
+            ->message($response['message'])
+            ->fields($response['fields'])
+            ->build()
+        );
+    }
+
 
 }

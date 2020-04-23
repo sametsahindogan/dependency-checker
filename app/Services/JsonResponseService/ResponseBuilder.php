@@ -5,7 +5,7 @@ namespace App\Services\JsonResponseService;
 
 /**
  * Class ResponseBuilder
- * @package App\Services\ResponseService
+ * @package App\Services\JsonResponseService
  */
 class ResponseBuilder implements ResponseBuilderInterface
 {

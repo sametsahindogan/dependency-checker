@@ -2,11 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Jobs\NotificationMailJob;
-use App\Models\Repository;
-use App\Services\CompareService\CompareInterface;
-use App\Services\GitService\GitFactory;
-use App\Services\GitService\GitResponse;
+use App\Services\CompareService\PackageComparator;
+use App\Services\DependencyService\DependencyService;
+use App\Services\GitService\GitService;
 use Illuminate\Console\Command;
 
 /**
@@ -29,23 +27,29 @@ class CompareDependencies extends Command
      */
     protected $description = 'Check all dependencies from database.';
 
-    /** @var CompareInterface $compare */
-    protected $compare;
+    /** @var PackageComparator $packageComparator */
+    protected $packageComparator;
 
-    /** @var GitFactory $gitFactory */
-    protected $gitFactory;
+    /** @var GitService $gitService */
+    protected $gitService;
+
+    /** @var DependencyService $dependencyService */
+    protected $dependencyService;
 
     /**
      * Create a new command instance.
      *
-     * @return void
+     * @param PackageComparator $packageComparator
+     * @param GitService $gitService
+     * @param DependencyService $dependencyService
      */
-    public function __construct(CompareInterface $compare, GitFactory $gitFactory)
+    public function __construct(PackageComparator $packageComparator, GitService $gitService, DependencyService $dependencyService)
     {
         parent::__construct();
 
-        $this->compare = $compare;
-        $this->gitFactory = $gitFactory;
+        $this->packageComparator = $packageComparator;
+        $this->gitService = $gitService;
+        $this->dependencyService = $dependencyService;
     }
 
     /**
@@ -53,45 +57,26 @@ class CompareDependencies extends Command
      *
      * @return mixed
      */
-    public function handle()
+    public function handle(): bool
     {
-        /** @var Repository $repositories */
-        $repositories = Repository::with('dependencies', 'emails')->get();
+        return $this->refreshAllRepositories();
+    }
 
-        foreach ($repositories as $repository){
+    /**
+     * @return bool
+     */
+    public function refreshAllRepositories(): bool
+    {
+        $this->dependencyService->deleteAllDependencies();
 
-            $repository->dependencies()->delete();
+        $repositories = $this->gitService->gitRepository->getAllRepositoriesWithGitProvidersAndEmails();
 
-            /** @var GitResponse|array $repo */
-            $repo = $this->gitFactory->make($repository->gitProvider->title)->getRepoWithDependencies($repository->repo_slug.'/'.$repository->project_slug);
-
-            if( ($repo instanceof GitResponse) || (empty($repo['dependencies']))){
-
-                $repository->status = Repository::STATUS_ERROR;
-                $repository->save();
-
-                $emails = [];
-                foreach ($repository->emails as $email){
-                    $emails[] = $email->title;
-                }
-                if(!empty($emails))
-                {
-                    $text = 'The dependencies of your project at '.$repository->repo_url.' could not be checked.';
-                    dispatch( (new NotificationMailJob($emails, $text)) );
-                }
-
-                return;
-            }
-
-            foreach ($repo['dependencies'] as $dependency) {
-                $repository->dependencies()->create($dependency);
-            }
-            $repository->status = Repository::STATUS_CHECKING;
-            $repository->save();
+        foreach ($repositories['datas'] as $repository) {
+            $this->gitService->refreshDependencies($repository);
         }
 
-        $this->compare->setCheckAll(true)->setModel(new Repository())->execute();
+        $this->packageComparator->run();
 
-        return;
+        return true;
     }
 }

@@ -12,7 +12,7 @@ class GitTypeSeeder extends Seeder
     public function run()
     {
         foreach (['github', 'bitbucket'] as $item) {
-            \App\Models\GitTypes::create([
+            \App\Models\Repositories\GitTypes::create([
                 'title' => $item
             ]);
         }

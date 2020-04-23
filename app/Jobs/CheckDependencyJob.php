@@ -2,8 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Models\Repository;
-use App\Services\CompareService\CompareInterface;
+use App\Services\CompareService\PackageComparator;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -35,13 +34,13 @@ class CheckDependencyJob implements ShouldQueue
     /**
      * Execute the job.
      *
+     * @param PackageComparator $packageComparator
      * @return void
      */
-    public function handle(CompareInterface $compare, Repository $repositoryModel)
+    public function handle(PackageComparator $packageComparator)
     {
-        $compare->setCheckAll(false)
-            ->setModel($repositoryModel)
-            ->setModelId($this->repositoryId)
-            ->execute();
+        $packageComparator->checkOnly($this->repositoryId)->run();
+
+        return;
     }
 }

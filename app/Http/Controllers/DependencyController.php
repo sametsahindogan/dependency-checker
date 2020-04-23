@@ -2,76 +2,46 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Interfaces\DependencyController\RenderJson;
-use App\Http\Controllers\Interfaces\DependencyController\RenderView;
-use App\Models\Dependency;
-use App\Models\Repository;
-use App\Services\JsonResponseService\ResponseBuilderInterface;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\View\View;
+use App\Services\DependencyService\Output\JsonOutput;
+use App\Services\DependencyService\DependencyService;
 
 /**
  * Class DependencyController
  * @package App\Http\Controllers
  */
-class DependencyController extends BaseCrudController implements RenderView, RenderJson
+class DependencyController extends Controller
 {
     /**
-     * GithubRepositoryController constructor.
-     * @param ResponseBuilderInterface $responseBuilder
-     * @param Repository $model
+     * @var DependencyService $service
      */
-    public function __construct(ResponseBuilderInterface $responseBuilder, Repository $model)
+    private $service;
+
+    /**
+     * DependencyController constructor.
+     * @param DependencyService $service
+     */
+    public function __construct(DependencyService $service)
     {
-        $this->response = $responseBuilder;
-        $this->model = $model;
+        $this->service = $service;
     }
 
     /**
-     * @param $repo_slug
-     * @param $project_slug
-     * @return View
+     * @param $repoSlug
+     * @param $projectSlug
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index($repo_slug, $project_slug): View
+    public function index($repoSlug, $projectSlug)
     {
-        return view('dependency.list', ['repo' => $repo_slug, 'project' => $project_slug]);
+        return view('dependency.list', ['repo' => $repoSlug, 'project' => $projectSlug]);
     }
 
     /**
-     * @param Request $request
-     * @param $repo_slug
-     * @param $project_slug
-     * @return JsonResponse
+     * @param $repoSlug
+     * @param $projectSlug
+     * @return mixed
      */
-    public function get(Request $request, $repo_slug, $project_slug): JsonResponse
+    public function get($repoSlug, $projectSlug)
     {
-        /** @var Model $queryBuilder */
-        $data = (new $this->model())->with([
-            'dependencies' => function ($query) {
-                $query->with('type');
-            }
-        ])->where(['repo_slug' => $repo_slug, 'project_slug' => $project_slug])->first();
-
-        $rows = [];
-        foreach ($data->dependencies as $key => $data) {
-
-            $rows[] = [
-                "id" => $data->id,
-                "type" => '<img src="' . asset('start-ui/img/' . $data->type->title . '.png') . '">',
-                "title" => '<b>' . $data->title . '</b>',
-                "current_version" => $data->current_version,
-                "latest_version" => $data->latest_version,
-                "status" => $this->getStatus($data->status)
-            ];
-        }
-
-        $output = [
-            "rows" => $rows
-        ];
-
-        return response()->json($output);
+        return $this->service->getRepositoryDependencies($repoSlug, $projectSlug, new JsonOutput());
     }
-
 }

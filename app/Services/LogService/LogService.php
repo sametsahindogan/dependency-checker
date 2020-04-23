@@ -40,6 +40,7 @@ class LogService implements LogServiceInterface
 
     /**
      * @param mixed $model
+     * @return LogService
      */
     public function setModel($model): self
     {
@@ -58,6 +59,7 @@ class LogService implements LogServiceInterface
 
     /**
      * @param mixed $modelId
+     * @return LogService
      */
     public function setModelId($modelId): self
     {
@@ -76,6 +78,7 @@ class LogService implements LogServiceInterface
 
     /**
      * @param mixed $newValue
+     * @return LogService
      */
     public function setNewValue($newValue = null): self
     {
@@ -94,6 +97,7 @@ class LogService implements LogServiceInterface
 
     /**
      * @param mixed $oldValue
+     * @return LogService
      */
     public function setOldValue($oldValue = null): self
     {
@@ -112,6 +116,7 @@ class LogService implements LogServiceInterface
 
     /**
      * @param mixed $action
+     * @return LogService
      */
     public function setAction($action): self
     {
@@ -130,6 +135,7 @@ class LogService implements LogServiceInterface
 
     /**
      * @param mixed $userId
+     * @return LogService
      */
     public function setUserId($userId): self
     {

@@ -2,108 +2,74 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Controllers\Interfaces\GithubRepositoryController\RenderJson;
-use App\Http\Controllers\Interfaces\GithubRepositoryController\RenderView;
-use App\Jobs\CheckDependencyJob;
-use App\Models\Email;
-use App\Models\GitTypes;
-use App\Models\Repository;
-use App\Services\GitService\GitFactory;
-use App\Services\GitService\GitRequest;
-use App\Services\GitService\GitResponse;
-use App\Services\JsonResponseService\ResponseBuilderInterface;
-use Illuminate\Database\Query\Builder;
-use Illuminate\Http\JsonResponse;
+use Exception;
+use App\Models\Emails\Email;
 use Illuminate\Http\Request;
+use App\Jobs\CheckDependencyJob;
+use App\Services\GitService\GitService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Support\MessageBag;
 use Illuminate\Validation\Validator;
-use Illuminate\View\View;
+use App\Models\Repositories\GitTypes;
+use App\Services\GitService\Output\JsonOutput;
+use App\Services\JsonResponseService\ResponseBuilderInterface;
 
 /**
  * Class GitRepositoryController
  * @package App\Http\Controllers
  */
-class GitRepositoryController extends BaseCrudController implements RenderView, RenderJson
+class GitRepositoryController extends Controller
 {
-    /** @var string $repo */
-    protected $repo;
+    /** @var ResponseBuilderInterface $response */
+    private $response;
 
-    /** @var GitRequest $gitFactory */
-    protected $gitFactory;
+    /** @var GitService $service */
+    private $service;
 
     /**
-     * GithubRepositoryController constructor.
+     * GitRepositoryController constructor.
      * @param ResponseBuilderInterface $responseBuilder
-     * @param Repository $model
+     * @param GitService $service
      */
-    public function __construct(ResponseBuilderInterface $responseBuilder, GitFactory $gitFactory, Repository $model)
+    public function __construct(ResponseBuilderInterface $responseBuilder, GitService $service)
     {
         $this->response = $responseBuilder;
-        $this->gitFactory = $gitFactory;
-        $this->model = $model;
+        $this->service = $service;
     }
 
     /**
-     * @return View
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function index(): View
+    public function index()
     {
         return view('repository.list');
     }
 
     /**
      * @param Request $request
-     * @return JsonResponse
+     * @return mixed
      */
-    public function get(Request $request): JsonResponse
+    public function get(Request $request)
     {
         $sort = $request->get('sort', 'id');
         $sortType = $request->get('order', 'desc');
         $offset = (int)$request->get('offset', 0);
         $limit = (int)$request->get('limit', 10);
 
-        /** @var Builder $queryBuilder */
-        $queryBuilder = (new $this->model())->with('gitProvider');
-
-        $total = $queryBuilder->count();
-
-        $datas = $queryBuilder->orderBy($sort, $sortType)
-            ->offset($offset)
-            ->limit($limit)
-            ->get();
-
-        $rows = [];
-        foreach ($datas as $key => $data) {
-
-            $rows[] = [
-                "id" => $data->id,
-                "order" => $offset + $key + 1,
-                "provider" =>'<img src="' . asset('start-ui/img/' . $data->gitProvider->title . '.png') . '" width="75">',
-                "status" => $this->getStatus($data->status),
-                "slug" => '<a href="' . route('dependencies', ['repo_slug' => $data->repo_slug, 'project_slug' => $data->project_slug]) . '"><b>' . $data->repo_slug . '/' . $data->project_slug . '</b></a>',
-                "checked_at" => $data->checked_at ? $data->checked_at->isoFormat('DD MMMM Y HH:mm') : '-',
-                "created_at" => $data->created_at->isoFormat('DD MMMM Y HH:mm'),
-            ];
-        }
-
-        $output = [
-            "total" => $total,
-            "rows" => $rows
-        ];
-
-        return response()->json($output);
+        return $this->service->getAllRepositoriesWithGitProviders($sort, $sortType, $offset, $limit, new JsonOutput());
     }
 
     /**
-     * @return View
+     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
      */
-    public function createPage(): View
+    public function createPage()
     {
         return view('repository.add')->with(['emails' => Email::all(), 'gitTypes' => GitTypes::all()]);
     }
 
     /**
      * @param Request $request
-     * @return JsonResponse|string
+     * @return JsonResponse
      */
     public function create(Request $request)
     {
@@ -116,69 +82,24 @@ class GitRepositoryController extends BaseCrudController implements RenderView, 
             'emails' => 'Email',
         ]);
 
-        if ($validator->fails())
-            return $this->getErrorResponse($validator->errors());
+        if ($validator->fails()) {
+            return $this->getValidationErrorResponse($validator->errors());
+        }
 
-        /** @var GitTypes $gitProvider */
-        $gitProvider = GitTypes::find($request->get('type_id'));
+        try {
 
-        /** @var array $formatedUrl */
-        $formatedUrl = $this->formatUrl($gitProvider->title, $request->get('repo_url'));
+            $repository = $this->service->createRepository($request->get('type_id'), $request->get('repo_url'), $request->get('emails', []));
 
-        if (!$formatedUrl) {
+        } catch (Exception $e) {
+
             return response()->json($this->response
                 ->result(false)
-                ->message('Please enter valid Git Repository address')
+                ->message($e->getMessage())
                 ->build()
             );
         }
 
-        if ($this->getRecordBySlug([
-            'repo_slug' => $formatedUrl[0],
-            'project_slug' => $formatedUrl[1]
-        ])) {
-            return response()->json($this->response
-                ->result(false)
-                ->message('This repository is already saved.')
-                ->build()
-            );
-        }
-
-        /** @var GitResponse|array $repo */
-        $repo = $this->gitFactory->make($gitProvider->title)->getRepoWithDependencies($this->repo);
-
-        if ($repo instanceof GitResponse) {
-            return response()->json($this->response
-                ->result(false)
-                ->message('Repository not found.')
-                ->build()
-            );
-        }
-
-        /** @var array $repo */
-        if (empty($repo['dependencies'])) {
-            return response()->json($this->response
-                ->result(false)
-                ->message('No dependency found in this repository.')
-                ->build()
-            );
-        }
-
-        $this->model->type_id = $request->get('type_id');
-        $this->model->status = 'checking';
-        $this->model->repo_slug = $formatedUrl[0];
-        $this->model->project_slug = $formatedUrl[1];
-        $this->model->repo_url = $request->get('repo_url');
-        $this->model->repo_id = $repo['repo_id'];
-        $this->model->save();
-
-        foreach ($repo['dependencies'] as $dependency) {
-            $this->model->dependencies()->create($dependency);
-        }
-
-        if ($request->has('emails')) $this->attachEmail($request->get('emails'));
-
-        dispatch((new CheckDependencyJob($this->model->id)));
+        $this->dispatch(new CheckDependencyJob($repository->id));
 
         return response()->json($this->response
             ->message('The repository was successfully registered and queued for dependency control.')
@@ -187,44 +108,22 @@ class GitRepositoryController extends BaseCrudController implements RenderView, 
 
     }
 
-    /**
-     * @param $url
-     * @return string
-     */
-    protected function formatUrl(string $provider, string $url)
+    protected function getValidationErrorResponse(MessageBag $errors)
     {
-        $url = str_replace('/src/master/','',$url);
-
-        $this->repo = str_replace('https://' . $provider . '.'.$this->providerExtension($provider).'/', '', $url);
-
-        $formatedUrl = explode('/', $this->repo);
-
-        if (count($formatedUrl) !== 2) return false;
-
-        return $formatedUrl;
-    }
-
-    /**
-     * @param $provider
-     * @return string
-     */
-    protected function providerExtension($provider)
-    {
-        switch ($provider){
-            case 'github':
-                return 'com';
-                break;
-            case 'bitbucket':
-                return 'org';
-                break;
+        $response = [];
+        $response['message'] = '<span class="validation-error-message">';
+        foreach ($errors->messages() as $field => $message) {
+            $response['fields'][$field] = '<span class="validation-error-field">' . $message[0] . '</span>';
+            $response['message'] .= $response['fields'][$field];
         }
+        $response['message'] .= '</span>';
+
+        return response()->json($this->response
+            ->result(false)
+            ->message($response['message'])
+            ->fields($response['fields'])
+            ->build()
+        );
     }
 
-    /**
-     * @param array $emails
-     */
-    protected function attachEmail(array $emails)
-    {
-        $this->model->emails()->attach($emails);
-    }
 }

@@ -15,7 +15,7 @@ class EmailSeeder extends Seeder
         $faker = Factory::create();
 
         foreach (range(0,10)as $item) {
-            \App\Models\Email::create([
+            \App\Models\Emails\Email::create([
                 'title' => $faker->email
             ]);
         }

@@ -3,7 +3,6 @@
 namespace App\Observers;
 
 use App\Services\LogService\Interfaces\LogServiceInterface;
-use App\Services\LogService\Interfaces\Renderable;
 use App\Services\LogService\RenderDatabase;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,7 +15,7 @@ class BaseObserver
 
     /**
      * BaseObserver constructor.
-     * @param Renderable $renderDatabase
+     * @param LogServiceInterface $logService
      */
     public function __construct(LogServiceInterface $logService)
     {
@@ -25,6 +24,7 @@ class BaseObserver
 
     /**
      * Handle the Model "created" event.
+     * @param Model $model
      * @return void
      */
     public function created(Model $model)

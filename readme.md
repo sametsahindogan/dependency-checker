@@ -32,5 +32,5 @@ For all repositories, a daily scheduled task is run and fetch the latest project
 
 ## Design Patterns
 
-Factory, Singleton, Observer, Decorator
+Repository, Factory, Singleton, Observer, Decorator
 

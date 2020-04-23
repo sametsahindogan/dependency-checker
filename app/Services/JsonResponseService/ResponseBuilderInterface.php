@@ -4,7 +4,7 @@ namespace App\Services\JsonResponseService;
 
 /**
  * Interface ResponseBuilderInterface
- * @package App\Services\ResponseService
+ * @package App\Services\JsonResponseService
  */
 interface ResponseBuilderInterface
 {
@@ -15,10 +15,10 @@ interface ResponseBuilderInterface
     public function result(bool $result);
 
     /**
-     * @param String $message
+     * @param string $message
      * @return $this
      */
-    public function message(String $message);
+    public function message(string $message);
 
     /**
      * @param array $fields

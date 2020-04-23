@@ -12,7 +12,7 @@ class DependencyTypeSeeder extends Seeder
     public function run()
     {
         foreach (['packagist', 'npm'] as $type) {
-            \App\Models\DependencyType::create([
+            \App\Models\Dependencies\DependencyType::create([
                 'title' => $type
             ]);
         }

@@ -2,12 +2,8 @@
 
 namespace App\Providers;
 
-use App\Models\Repository;
+use App\Models\Repositories\Repository;
 use App\Observers\BaseObserver;
-use App\Services\CompareService\Compare;
-use App\Services\CompareService\CompareInterface;
-use App\Services\DependencyService\DependencyFactory;
-use App\Services\GitService\GitFactory;
 use App\Services\JsonResponseService\ResponseBuilderInterface;
 use App\Services\LogService\Interfaces\LogServiceInterface;
 use App\Services\LogService\LogService;
@@ -31,9 +27,6 @@ class AppServiceProvider extends ServiceProvider
      */
     protected $singletonBindings = [
         ResponseBuilderInterface::class => ResponseBuilder::class,
-        GitFactory::class => GitFactory::class,
-        DependencyFactory::class => DependencyFactory::class,
-        CompareInterface::class => Compare::class,
         LogServiceInterface::class => LogService::class,
     ];
 
