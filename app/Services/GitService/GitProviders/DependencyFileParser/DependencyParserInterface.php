@@ -8,7 +8,7 @@ use App\Services\GitService\GitProviders\GitApiInterfaces\GitApiResponse;
  * Interface DependencyParser
  * @package App\Services\GitService\GitProviders\DependencyFileParser
  */
-interface DependencyParser
+interface DependencyParserInterface
 {
     /**
      * @return array
@@ -19,7 +19,7 @@ interface DependencyParser
      * @param GitApiResponse $response
      * @return self
      */
-    public function execute(GitApiResponse $response): DependencyParser;
+    public function execute(GitApiResponse $response): DependencyParserInterface;
 
     /**
      * @param GitApiResponse $response

@@ -9,7 +9,7 @@ use App\Services\GitService\GitProviders\GitApiInterfaces\GitApiResponse;
  * Class PackagistParser
  * @package App\Services\GitService\GitProviders\DependencyFileParser
  */
-class PackagistParser implements DependencyParser
+class PackagistParser implements DependencyParserInterface
 {
     /** @var array $packages */
     protected $packages = [];
@@ -42,9 +42,9 @@ class PackagistParser implements DependencyParser
 
     /**
      * @param GitApiResponse $response
-     * @return DependencyParser
+     * @return DependencyParserInterface
      */
-    public function execute(GitApiResponse $response): DependencyParser
+    public function execute(GitApiResponse $response): DependencyParserInterface
     {
         if (!$response->isSuccessful()) return $this;
 
