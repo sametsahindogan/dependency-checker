@@ -50,9 +50,11 @@ class GitServiceHelper
         switch ($provider) {
             case 'github':
                 return 'com';
+
                 break;
             case 'bitbucket':
                 return 'org';
+
                 break;
         }
     }

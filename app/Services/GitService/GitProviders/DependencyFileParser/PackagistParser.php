@@ -94,9 +94,11 @@ class PackagistParser implements DependencyParserInterface
         switch ($response->getEncodeType()) {
             case 'base64':
                 $data = base64_decode($response->getFileContent());
+
                 break;
             default:
                 $data = json_encode($response->getFileContent());
+
                 break;
         }
 

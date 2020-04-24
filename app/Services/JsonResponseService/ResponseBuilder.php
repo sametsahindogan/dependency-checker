@@ -25,6 +25,7 @@ class ResponseBuilder implements ResponseBuilderInterface
     public function result(bool $result): self
     {
         $this->result = $result;
+
         return $this;
     }
 
@@ -35,6 +36,7 @@ class ResponseBuilder implements ResponseBuilderInterface
     public function message(String $message): self
     {
         $this->message = trim($message);
+
         return $this;
     }
 
@@ -45,6 +47,7 @@ class ResponseBuilder implements ResponseBuilderInterface
     public function fields(array $fields): self
     {
         $this->fields = $fields;
+
         return $this;
     }
 

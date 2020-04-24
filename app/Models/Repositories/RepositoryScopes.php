@@ -58,6 +58,7 @@ trait RepositoryScopes
     {
         $this->checked_at = now();
         $this->status = Repository::STATUS_ERROR;
+
         return $this->save();
     }
 
@@ -68,6 +69,7 @@ trait RepositoryScopes
     {
         $this->checked_at = now();
         $this->status = Repository::STATUS_CHECKING;
+
         return $this->save();
     }
 
@@ -78,6 +80,7 @@ trait RepositoryScopes
     {
         $this->checked_at = now();
         $this->status = Repository::STATUS_OUTDATED;
+
         return $this->save();
     }
 
@@ -88,6 +91,7 @@ trait RepositoryScopes
     {
         $this->checked_at = now();
         $this->status = Repository::STATUS_UPTODATE;
+
         return $this->save();
     }
 }

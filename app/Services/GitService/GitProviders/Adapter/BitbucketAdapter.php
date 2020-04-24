@@ -20,6 +20,7 @@ class BitbucketAdapter implements GitAdapterInterface
     public function setRepo(string $repo): GitAdapterInterface
     {
         $this->repo = $repo;
+
         return $this;
     }
 

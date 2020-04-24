@@ -16,6 +16,7 @@ trait DependencyScopes
     public function outdated(): bool
     {
         $this->status = Dependency::STATUS_OUTDATED;
+
         return $this->save();
     }
 
@@ -25,6 +26,7 @@ trait DependencyScopes
     public function checking(): bool
     {
         $this->status = Dependency::STATUS_CHECKING;
+
         return $this->save();
     }
 
@@ -34,6 +36,7 @@ trait DependencyScopes
     public function uptodate(): bool
     {
         $this->status = Dependency::STATUS_UPTODATE;
+
         return $this->save();
     }
 }

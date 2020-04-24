@@ -67,6 +67,7 @@ class PackageComparator
     public function checkOnly(int $id): self
     {
         $this->checkOnly = $id;
+
         return $this;
 
     }
@@ -100,6 +101,7 @@ class PackageComparator
         foreach ($emails as $email) {
             $this->mailList[] = $email->title;
         }
+
         return $this;
     }
 
