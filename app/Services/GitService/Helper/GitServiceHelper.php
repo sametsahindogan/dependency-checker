@@ -57,5 +57,7 @@ class GitServiceHelper
 
                 break;
         }
+
+        return '';
     }
 }

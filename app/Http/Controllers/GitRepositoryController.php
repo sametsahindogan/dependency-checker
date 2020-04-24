@@ -13,6 +13,7 @@ use Illuminate\Validation\Validator;
 use App\Models\Repositories\GitTypes;
 use App\Services\GitService\Output\JsonOutput;
 use App\Services\JsonResponseService\ResponseBuilderInterface;
+use Illuminate\View\View;
 
 /**
  * Class GitRepositoryController
@@ -38,9 +39,9 @@ class GitRepositoryController extends Controller
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return View
      */
-    public function index()
+    public function index(): View
     {
         return view('repository.list');
     }
@@ -60,9 +61,9 @@ class GitRepositoryController extends Controller
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return View
      */
-    public function createPage()
+    public function createPage(): View
     {
         return view('repository.add')->with(['emails' => Email::all(), 'gitTypes' => GitTypes::all()]);
     }
@@ -71,7 +72,7 @@ class GitRepositoryController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function create(Request $request)
+    public function create(Request $request): JsonResponse
     {
         /** @var Validator $validator */
         $validator = validator($request->all(), [
@@ -108,7 +109,11 @@ class GitRepositoryController extends Controller
 
     }
 
-    protected function getValidationErrorResponse(MessageBag $errors)
+    /**
+     * @param MessageBag $errors
+     * @return JsonResponse
+     */
+    protected function getValidationErrorResponse(MessageBag $errors): JsonResponse
     {
         $response = [];
         $response['message'] = '<span class="validation-error-message">';

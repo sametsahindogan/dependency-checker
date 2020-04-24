@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\DependencyService\Output\JsonOutput;
 use App\Services\DependencyService\DependencyService;
+use Illuminate\View\View;
 
 /**
  * Class DependencyController
@@ -28,9 +29,9 @@ class DependencyController extends Controller
     /**
      * @param $repoSlug
      * @param $projectSlug
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return View
      */
-    public function index($repoSlug, $projectSlug)
+    public function index($repoSlug, $projectSlug): View
     {
         return view('dependency.list', ['repo' => $repoSlug, 'project' => $projectSlug]);
     }

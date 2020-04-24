@@ -3,12 +3,14 @@
 namespace App\Http\Controllers;
 
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\MessageBag;
 use App\Services\EmailService\EmailService;
 use Illuminate\Validation\Validator;
 use App\Services\EmailService\Output\JsonOutput;
 use App\Services\JsonResponseService\ResponseBuilderInterface;
+use Illuminate\View\View;
 
 /**
  * Class EmailController
@@ -34,9 +36,9 @@ class EmailController extends Controller
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|\Illuminate\View\View
+     * @return View
      */
-    public function index()
+    public function index(): View
     {
         return view('email.list');
     }
@@ -56,18 +58,18 @@ class EmailController extends Controller
     }
 
     /**
-     * @return \Illuminate\Contracts\View\Factory|View
+     * @return View
      */
-    public function createPage()
+    public function createPage(): View
     {
         return view('email.add');
     }
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function create(Request $request)
+    public function create(Request $request): JsonResponse
     {
         /** @var Validator $validator */
         $validator = validator($request->all(), [
@@ -84,10 +86,7 @@ class EmailController extends Controller
         return response()->json($this->response->message("Successfully added.")->build());
     }
 
-    /**
-     * @param $id
-     * @return \Illuminate\Contracts\View\Factory|View
-     */
+
     public function updatePage($id)
     {
         return view('email.edit')->with(['email' => $this->service->getById($id)]);
@@ -95,9 +94,9 @@ class EmailController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function update(Request $request)
+    public function update(Request $request): JsonResponse
     {
         /** @var Validator $validator */
         $validator = validator($request->all(), [
@@ -130,6 +129,7 @@ class EmailController extends Controller
     /**
      * @param $id
      * @return View
+     * @throws Exception
      */
     public function deletePage($id): View
     {
@@ -138,9 +138,9 @@ class EmailController extends Controller
 
     /**
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function delete(Request $request)
+    public function delete(Request $request): JsonResponse
     {
         try {
 
@@ -160,7 +160,11 @@ class EmailController extends Controller
         );
     }
 
-    protected function getValidationErrorResponse(MessageBag $errors)
+    /**
+     * @param MessageBag $errors
+     * @return JsonResponse
+     */
+    protected function getValidationErrorResponse(MessageBag $errors): JsonResponse
     {
         $response = [];
         $response['message'] = '<span class="validation-error-message">';
