@@ -12,7 +12,6 @@ if (!function_exists('authed')) {
     }
 }
 
-
 if (!function_exists('getStatus')) {
     /**
      * @return mixed

@@ -23,20 +23,15 @@ class GitService
     /** @var GitProviderFactory $gitFactory */
     public $gitProviderFactory;
 
-    /** @var GitServiceHelper $serviceHelper */
-    public $serviceHelper;
-
     /**
      * GitService constructor.
      * @param GitRepository $gitRepository
      * @param GitProviderFactory $gitProviderFactory
-     * @param GitServiceHelper $serviceHelper
      */
-    public function __construct(GitRepository $gitRepository, GitProviderFactory $gitProviderFactory, GitServiceHelper $serviceHelper)
+    public function __construct(GitRepository $gitRepository, GitProviderFactory $gitProviderFactory)
     {
         $this->gitRepository = $gitRepository;
         $this->gitProviderFactory = $gitProviderFactory;
-        $this->serviceHelper = $serviceHelper;
     }
 
     /**
@@ -62,11 +57,11 @@ class GitService
      */
     public function createRepository(int $typeId, string $repoUrl, array $emails): Repository
     {
-        $gitProvider = $this->serviceHelper->resolveGitProvider($typeId);
+        $gitProvider = GitServiceHelper::resolveGitProvider($typeId);
 
-        $repoName = $this->serviceHelper->getRepoName($gitProvider->title, $repoUrl);
+        $repoName = GitServiceHelper::getRepoName($gitProvider->title, $repoUrl);
 
-        $repoSlug = $this->serviceHelper->getRepoSlug($repoName);
+        $repoSlug = GitServiceHelper::getRepoSlug($repoName);
 
         if ($this->isItAlreadySaved($repoSlug[0], $repoSlug[1])) {
             throw new Exception('This repository is already saved.');

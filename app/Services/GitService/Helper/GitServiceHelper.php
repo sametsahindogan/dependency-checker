@@ -15,7 +15,7 @@ class GitServiceHelper
      * @param int $id
      * @return GitTypes
      */
-    public function resolveGitProvider(int $id): GitTypes
+    public static function resolveGitProvider(int $id): GitTypes
     {
         return GitTypes::findOrFail($id);
     }
@@ -25,18 +25,18 @@ class GitServiceHelper
      * @param string $url
      * @return string
      */
-    public function getRepoName(string $provider, string $url): string
+    public static function getRepoName(string $provider, string $url): string
     {
         $url = str_replace('/src/master/', '', $url);
 
-        return str_replace('https://' . $provider . '.' . $this->providerExtension($provider) . '/', '', $url);
+        return str_replace('https://' . $provider . '.' . self::providerExtension($provider) . '/', '', $url);
     }
 
     /**
      * @param string $repoName
      * @return array
      */
-    public function getRepoSlug(string $repoName): array
+    public static function getRepoSlug(string $repoName): array
     {
         return explode('/', $repoName);
     }
@@ -45,7 +45,7 @@ class GitServiceHelper
      * @param string $provider
      * @return string
      */
-    public function providerExtension(string $provider): string
+    public static function providerExtension(string $provider): string
     {
         switch ($provider) {
             case 'github':
