@@ -26,7 +26,6 @@ class NotificationMailJob implements ShouldQueue
 
     /**
      * NotificationMailJob constructor.
-     * @param string $repositoryUrl
      * @param array $to
      * @param string $text
      */

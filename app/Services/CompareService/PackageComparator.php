@@ -128,17 +128,25 @@ class PackageComparator
 
         }
 
+        $this->handleRepositoryStatus($repository);
+
+        return true;
+    }
+
+    /**
+     * @param Repository $repository
+     * @return bool
+     */
+    protected function handleRepositoryStatus(Repository $repository): bool
+    {
+        /** If any outdated package is found, the repositoryStatus value has changed. */
         if ($this->repositoryStatus === Repository::STATUS_CHECKING) {
 
-            $this->gitRepository->setStatusUptodate($repository);
-
-        } else {
-
-            $this->gitRepository->setStatusOutdated($repository);
+            return $this->gitRepository->setStatusUptodate($repository);
 
         }
 
-        return true;
+        return $this->gitRepository->setStatusOutdated($repository);
     }
 
     /**
